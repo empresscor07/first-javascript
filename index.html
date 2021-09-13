@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body    {background-color: #e6f2ff;}
+        h2      {color: #660066;}
+        p       {color: purple;}
+        button  {
+                color: white;
+                background-color: #660066; 
+                }
+    </style>
+</head>
+<body>
+
+
+<div>
+    <!--put your HTML code to input data here-->
+    <h2 id="content">Please Enter Credentials</h2>
+
+    <p>User Id: <input id="user" type="text" value=""></p>
+    <p>First Name: <input id="first" type="text" value=""></p>
+    <p>Last Name: <input id="last" type="text" value=""></p>
+    <p>Birthday: <input id="bday" type="date" value=""></p>
+
+    <button type="button" id="button" onclick="buttonText()">Accept</button>
+
+    <!-- Paragraphs to hold messages for user-->
+    <p id="results"></p>
+    <p id="fnameError"></p>
+    <p id="lnameError"></p>
+    <p id="bdayError"></p>
+    <p id="underage"></p>   
+    </div>
+
+<script>
+    //declare variables
+    var fname, lname, uid, birthday, validUser;
+
+    // put your JavaScript code to read HTML inputs
+    //function to check what the text of the button says
+    //tells us whether we are on starting form or result page
+    function buttonText() {
+	//if we are on starting form button will say accept
+	if (document.getElementById("button").innerHTML == "Accept") {
+		//sets variables to input values
+		fname = document.getElementById("first").value;
+		lname = document.getElementById("last").value;
+		uid = document.getElementById("user").value;
+		birthday = document.getElementById("bday").value;
+			
+		//runs user validation
+		validUser = userValidation(uid)
+		if (validUser){
+            //Clear Invalid warning
+            document.getElementById("results").innerHTML = "";
+			//check if all other data fields have data entered
+			if ((document.getElementById("first").value != "") 
+				&& (document.getElementById("last").value != "")
+				&& (document.getElementById("bday").value != "")) {
+				//if all fields have data entered this sets up results page
+				document.getElementById("content").innerHTML = "Thank you!!";
+				document.getElementById("button").innerHTML = "Back";
+				document.getElementById("bdayError").innerHTML = "";
+                document.getElementById("lnameError").innerHTML = "";
+                document.getElementById("fnameError").innerHTML = "";
+
+				//runs datediff fuction for results page
+				var differenceInDays = dateDiff(birthday);
+				
+				// and document.getElementById().innerHTML to display results
+				document.getElementById("results").innerHTML = 
+				fname + " " + lname + " you have been breathing for " 
+				+ differenceInDays + " days!";
+				if (differenceInDays < (365*18)){
+					document.getElementById("underage").innerHTML =
+					"You are probably not old enough to take this class!";
+				}
+			}
+			else {
+                if (document.getElementById("first").value == "") {
+				    document.getElementById("fnameError").innerHTML = "First Name field empty!";
+                }
+                else {
+                    document.getElementById("fnameError").innerHTML = "";
+                }
+                if (document.getElementById("last").value == "") {
+                    document.getElementById("lnameError").innerHTML = "Last Name field empty!";
+                }
+                else {
+                    document.getElementById("lnameError").innerHTML = "";
+                }
+                if (document.getElementById("bday").value == "") {
+                    document.getElementById("bdayError").innerHTML = "Please select your birthdate!";
+                }
+                else {
+                    document.getElementById("bdayError").innerHTML = "";
+                }
+            }
+		}
+		else {
+			//displays text for invalid username
+			document.getElementById("results").innerHTML = "Invalid UserID";
+			//clears UserID field for reentry
+			document.getElementById("user").value = "";
+		}
+	}
+	else {
+		//if we are results page button will say'back'
+		//resets back to form page
+		document.getElementById("content").innerHTML = "Please Enter Credentials";
+		document.getElementById("button").innerHTML = "Accept";
+		document.getElementById("user").value = "";
+		document.getElementById("first").value = "";
+		document.getElementById("last").value = "";
+		document.getElementById("bday").value = "";
+		document.getElementById("results").innerHTML = "";
+        document.getElementById("fnameError").innerHTML = "";
+        document.getElementById("lnameError").innerHTML = "";
+        document.getElementById("bdayError").innerHTML = "";
+        document.getElementById("underage").innerHTML = "";
+		}
+    }
+
+    // and validate inputs here using if statements
+    //varification function
+    function userValidation(userID)  {
+	//variables to hold boolean values
+	var containsCap, containsLower, containsNumber, correctLength;
+	//variables to hold test values
+	var userLength;
+	var notNumber; //boolean value
+	var numbersPresent = 0;
+	var uppercasePresent = 0;
+	var lowercasePresent = 0;
+    var currentChar;
+	
+	//testing userID length
+	userLength = userID.length;
+	if ((userLength >= 8) && (userLength <= 12)) {
+		correctLength = true;
+	}
+	else {
+		correctLength = false;
+	}
+	
+	//Classifying and counting types of characters in UserId string
+	for (let i in userID) {
+		currentChar = userID[i];
+		notNumber = isNaN(userID[i]);
+		//counting numbers in userID string
+		if (!notNumber) {
+		numbersPresent += 1;
+		}
+		else {
+			//counting uppercase in userID string
+			if (currentChar == currentChar.toUpperCase()){
+				uppercasePresent += 1;
+			}
+			//counting lowercase in userID
+			if (currentChar == currentChar.toLowerCase()){
+				lowercasePresent += 1;
+			}
+		}
+	}
+	//contains numbers?
+	if (numbersPresent == 0) {
+		containsNumber = false;
+	}
+	else {
+		containsNumber = true;
+	}
+	//contains Capital letters?
+	if (uppercasePresent == 0) {
+		containsCap = false;
+	}
+	else {
+		containsCap = true;
+	}
+	//contains lowercase letters?
+	if (lowercasePresent == 0) {
+		containsLower = false;
+	}
+	else {
+		containsLower = true;
+	}
+
+	//Test the status of all username requirements
+	if (correctLength && containsNumber && containsCap && containsLower){
+		validUser = true;
+	}
+	else {
+		validUser = false;
+	}
+	return validUser;
+    }
+
+    // write your JS functions here
+    //function to take users birthday and return number of days since then
+    function dateDiff(bday) {
+	
+	var today = new Date();
+	var birthdate = new Date(bday);
+
+	// To calculate the time difference of two dates
+	var differenceInTime = today.getTime() - birthdate.getTime();
+  
+	// To calculate the no. of days between two dates
+	var differenceInDays = Math.round(differenceInTime / (1000 * 3600 * 24));
+	return differenceInDays;
+	
+    }
+
+    // write your JS Loop For here to print the Xs
+    // use something like document.write(str.padStart(i,"x") + "<br>");
+    let str = "";
+    for (let i = 0; i < 21; i++) {
+	str = str.padStart(i,"X");
+	document.write(str + "<br>") ;
+}
+    
+        
+</script>
+
+</body>
+</html>
+ 
